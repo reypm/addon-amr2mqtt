@@ -1,23 +1,23 @@
 ARG BUILD_FROM=ghcr.io/hassio-addons/debian-base/amd64
 
-# https://hub.docker.com/_/alpine
-FROM alpine:3.22.0 as build_rtlamr
-
-# https://github.com/bemasher/rtlamr/releases
+FROM alpine:latest as build_rtlamr
 ENV RTLAMR_VERSION 0.9.1
 
-RUN set -eux && apk update && apk add --no-cache --virtual .build-deps tar curl && \
-    ARCH=$(apk --print-arch) && \
-    echo "Running on architecture: $ARCH" && \
-    case "${ARCH}" in \
+RUN set -eux; \
+    apk update; \
+        apk add --no-cache --virtual .build-deps \
+            tar \
+            curl \
+        ; \
+    APKARCH="$(apk --print-arch)"; \
+    case "${APKARCH}" in \
         x86_64)  BINARCH='amd64' ;; \
         armhf)   BINARCH='arm' ;; \
         armv7)   BINARCH='arm' ;; \
         aarch64) BINARCH='arm64' ;; \
-        *) echo >&2 "error: unsupported architecture (${ARCH})"; exit 1 ;; \
+        *) echo >&2 "error: unsupported architecture (${APKARCH})"; exit 1 ;; \
     esac; \
-    curl -J -L -o /tmp/rtlamr.tar.gz \
-    "https://github.com/bemasher/rtlamr/releases/download/v${RTLAMR_VERSION}/rtlamr_linux_${BINARCH}.tar.gz"; \
+    curl -J -L -o /tmp/rtlamr.tar.gz "https://github.com/bemasher/rtlamr/releases/download/v${RTLAMR_VERSION}/rtlamr_linux_${BINARCH}.tar.gz"; \
     tar -xf /tmp/rtlamr.tar.gz -C /usr/bin; \
     chmod a+x /usr/bin/rtlamr; \
     rm /tmp/rtlamr.tar.gz;
@@ -40,7 +40,7 @@ RUN set -eux; \
     \
     echo "Add user for AMR2MQTT"; \
     mkdir -p /data/amr2mqtt; \
-    useradd -u 12345 -U -d /data/amr2mqtt abc; 
+    useradd -u 12345 -U -d /data/amr2mqtt abc;
 
 # Add rtlamr
 COPY --from=build_rtlamr /usr/bin/rtlamr /usr/bin/rtlamr
