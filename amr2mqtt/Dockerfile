@@ -1,16 +1,14 @@
 ARG BUILD_FROM=ghcr.io/hassio-addons/debian-base/amd64
 
 # https://hub.docker.com/_/alpine
-FROM alpine:3.16.2 as build_rtlamr
+FROM alpine:3.22.0 as build_rtlamr
+
 # https://github.com/bemasher/rtlamr/releases
 ENV RTLAMR_VERSION 0.9.1
 
 RUN set -eux; \
     apk update; \
-        apk add --no-cache --virtual .build-deps \
-            tar=1.34-r0 \
-            curl=7.83.1-r2 \
-        ; \
+    apk add --no-cache --virtual .build-deps tar curl;
     APKARCH="$(apk --print-arch)"; \
     case "${APKARCH}" in \
         x86_64)  BINARCH='amd64' ;; \
@@ -31,7 +29,7 @@ FROM ${BUILD_FROM}
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -qy --no-install-recommends \ 
+    apt-get install -qy --no-install-recommends \
         ca-certificates=20210119 \
         librtlsdr-dev=0.6.0-3 \
         python3-paho-mqtt=1.5.1-1 \

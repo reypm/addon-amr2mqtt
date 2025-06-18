@@ -1,6 +1,6 @@
 ---
 name: AMR2MQTT
-url: https://github.com/mdegat01/addon-amr2mqtt
+url: https://github.com/reypm/addon-amr2mqtt
 version: dev
 slug: amr2mqtt
 arch:
@@ -24,14 +24,15 @@ options:
 schema:
   meters:
     - id: int
-      protocol: list(idm|netidm|r900|scm|scm+)
-      name: str?
-      type: list(gas|water|energy)?
-      multiplier: float(0,)?
-      precision: int(0,)?
-      unit_of_measurement: str?
       manufacturer: str?
       model: str?
+      multiplier: float(0,)?
+      name: str?
+      precision: int(0,)?
+      protocol: list(idm|netidm|r900|scm|scm+)
+      device_class: list(gas|water|energy)
+      unit_of_measurement: str?
+      state_class: list(total|total_increasing)?
   mqtt:
     host: str?
     port: port?
