@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Runs rtlamr to watch for broadcasts from power meter(s). Passings readings
-found to MQTT at topic `amr2mqtt/{meter_ID}`. If meter ID
+Runs rename to watch for broadcasts from power meter(s). Passings readings
+found to MQTT at a topic `amr2mqtt/{meter_ID}`. If meter ID
 is a watched one, processes its reading using settings first.
 
 """
@@ -210,14 +210,23 @@ def create_interval_sensor(meter_id, meter, device_name, device_id):
 
 def set_consumption_details(payload, meter):
     """Set discovery details for a consumption sensor."""
-    payload["state_class"] = "total"
-    if "type" in meter:
-        if meter["type"] == "gas":
-            payload["device_class"] = "gas"
-        elif meter["type"] == "energy":
-            payload["device_class"] = "energy"
-        else:
-            payload["icon"] = "mdi:water"
+    if "state_class" in meter:
+        payload["state_class"] = meter["state_class"]
+    else:
+        payload["state_class"] = "total"
+
+    if "device_class" in meter:
+        payload["device_class"] = meter["device_class"]
+
+        #if meter["device_class"] == "gas":
+        #elif meter["type"] == "energy":
+        #    payload["device_class"] = "energy"
+        #else:
+        #    payload["device_class"] = "water"
+    else:
+        logging.error('The device_class is required', "Invalid device_class required parameter")
+        stop_rtlamr()
+        sys.exit(0)
 
     if "unit_of_measurement" in meter:
         payload["unit_of_measurement"] = meter["unit_of_measurement"]
@@ -226,7 +235,7 @@ def set_consumption_details(payload, meter):
 
 
 def create_sensor(attribute, device_name, device_id, enabled=True, category=None):
-    """Create generic discovery message to make reading attribute into sensor."""
+    """Create a generic discovery message to make reading attribute into sensor."""
     # Turn camelcase into spaces
     name = re.sub(r"([^A-Z]|ERT)([A-Z])", r"\1 \2", attribute)
     sensor = {
